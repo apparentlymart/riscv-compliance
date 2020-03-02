@@ -109,45 +109,9 @@
 #define RVTEST_CODE_BEGIN                                               \
         .section .text.init;                                            \
         .align  6;                                                      \
-        .weak stvec_handler;                                            \
-        .weak mtvec_handler;                                            \
         .globl _start;                                                  \
-_start:                                                                 \
-        /* reset vector */                                              \
-        j reset_vector;                                                 \
-        .align 2;                                                       \
-trap_vector:                                                            \
-        /* test whether the test came from pass/fail */                 \
-        csrr t5, mcause;                                                \
-        li t6, CAUSE_USER_ECALL;                                        \
-        beq t5, t6, write_tohost;                                       \
-        li t6, CAUSE_SUPERVISOR_ECALL;                                  \
-        beq t5, t6, write_tohost;                                       \
-        li t6, CAUSE_MACHINE_ECALL;                                     \
-        beq t5, t6, write_tohost;                                       \
-        /* if an mtvec_handler is defined, jump to it */                \
-        la t5, mtvec_handler;                                           \
-        beqz t5, 1f;                                                    \
-        jr t5;                                                          \
-        /* was it an interrupt or an exception? */                      \
-  1:    csrr t5, mcause;                                                \
-        bgez t5, handle_exception;                                      \
-        INTERRUPT_HANDLER;                                              \
-handle_exception:                                                       \
-        /* we don't know how to handle whatever the exception was */    \
-  other_exception:                                                      \
-        /* some unhandlable exception occurred */                       \
-  1:    ori TESTNUM, TESTNUM, 1337;                                     \
-  write_tohost:                                                         \
-        sw TESTNUM, tohost, t5;                                         \
-        j write_tohost;                                                 \
-reset_vector:                                                           \
-        RISCV_MULTICORE_DISABLE;                                        \
-        INIT_SPTBR;                                                     \
-        INIT_PMP;                                                       \
-        DELEGATE_NO_TRAPS;                                              \
-1:                                                                      \
-begin_testcode:
+begin_testcode:                                                         \
+_start:
 
 
 //-----------------------------------------------------------------------
